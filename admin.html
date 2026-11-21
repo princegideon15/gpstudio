@@ -48,7 +48,7 @@ function shrink(file){return new Promise((ok,no)=>{const img=new Image(),u=URL.c
     c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
     URL.revokeObjectURL(u);ok({image:c.toDataURL('image/jpeg',.82),w:c.width,h:c.height})};img.onerror=()=>no(new Error('bad image'));img.src=u})}
 async function api(method,body){const r=await fetch('/api/admin',{method,headers:{'Content-Type':'application/json','x-admin-password':pw.value},body:JSON.stringify(body)});
-  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Request failed');return d}
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||('Request failed (HTTP '+r.status+')'));return d}
 $('go').onclick=async()=>{sessionStorage.setItem('gpw',pw.value);$('go').disabled=true;let n=0;
   for(const f of queue){try{say(`Uploading ${n+1} of ${queue.length}…`);await api('POST',{category:$('cat').value,...await shrink(f)});n++}
     catch(e){say(e.message+'. Upload stopped.',true);$('go').disabled=false;load();return}}

@@ -20,5 +20,5 @@ export default async function handler(req, res) {
       await del(url); return res.status(200).json({ ok: true });
     }
     res.status(405).end();
-  } catch (e) { res.status(500).json({ error: 'Server error' }); }
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Server error: ' + (e.message || 'unknown') }); }
 }
