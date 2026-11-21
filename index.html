@@ -6,17 +6,12 @@
 <title>GP Studio PH — Photography</title>
 <meta name="description" content="Photography for birthdays, weddings, christenings, portraits and products. Browse the portfolio, pick a package and book online.">
 <meta name="theme-color" content="#0d0d0e">
-<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="GP Studio">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+<link rel="stylesheet" href="vendor/flatpickr.min.css">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -33,7 +28,6 @@
   <div class="top-r">
     <a class="soc" href="https://www.facebook.com/gpstudioph" target="_blank" rel="noopener">Facebook</a>
     <a class="soc" href="https://www.instagram.com/gpstudioph" target="_blank" rel="noopener">Instagram</a>
-    <button class="btn btn-sm btn-line" id="install" type="button" hidden>Install app</button>
   </div>
 </header>
 
@@ -209,8 +203,8 @@
 </dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="vendor/flatpickr.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

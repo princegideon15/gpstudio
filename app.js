@@ -409,17 +409,7 @@ document.getElementById('gen-pdf').addEventListener('click', function(){
     setTimeout(function(){ var bad=$('.field.invalid'); if(bad) bad.scrollIntoView({block:'center',behavior:reduce?'auto':'smooth'}); },60);
   });
 
-  /* ---------- PWA: install + offline ---------- */
-  var deferred=null, ib=$('#install');
-  var standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
-  addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); deferred=e; ib.hidden=false; });
-  addEventListener('appinstalled',function(){ ib.hidden=true; toast('GP Studio installed'); });
-  if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!standalone) ib.hidden=false;
-  ib.addEventListener('click',function(){
-    if(deferred){ deferred.prompt(); deferred.userChoice.then(function(){ deferred=null; ib.hidden=true; }); }
-    else toast('Tap Share, then Add to Home Screen');
-  });
-  addEventListener('offline',function(){ toast('You’re offline. Browsing still works.'); });
-  addEventListener('online',function(){ toast('Back online'); });
-  if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)) addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  /* ---------- Not installable: remove any service worker/cache left by earlier versions ---------- */
+  if('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); }).catch(function(){});
+  if(window.caches) caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
 })();
