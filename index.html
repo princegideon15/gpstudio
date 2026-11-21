@@ -212,10 +212,5 @@
 <script src="vendor/flatpickr.min.js"></script>
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="app.js"></script>
-<script src="portfolio.js"></script>
-<script>
-if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}
-let _ip;addEventListener('beforeinstallprompt',e=>{e.preventDefault();_ip=e;const b=document.getElementById('install');if(b){b.hidden=false;b.onclick=async()=>{_ip.prompt();await _ip.userChoice;b.hidden=true;};}});
-</script>
 </body>
 </html>
