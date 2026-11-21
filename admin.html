@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex"><title>Portfolio manager — GP Studio PH</title>
+<style>
+:root{--bg:#0d0d0e;--card:#17171a;--ink:#f2efe8;--mute:#9a968c;--gold:#d8b26a;--line:#2a2a2e;--bad:#e5705f}
+@media (prefers-color-scheme:light){:root{--bg:#f6f3ec;--card:#fff;--ink:#1a1a1c;--mute:#6b675e;--line:#ddd8cc;--gold:#9a7425}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,sans-serif;padding:env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom))}
+main{max-width:900px;margin:0 auto}h1{font:400 1.8rem Fraunces,Georgia,serif;margin:24px 0 4px}p{color:var(--mute);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+label{display:block;font-weight:600;font-size:.9rem;margin:0 0 6px}
+input,select,button{font:inherit;color:inherit}input[type=password],select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);margin-bottom:12px}
+.btn{min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--gold);background:var(--gold);color:#16120a;font-weight:600;cursor:pointer}
+.btn.line{background:none;color:var(--ink);border-color:var(--line)}.btn:disabled{opacity:.5}
+.drop{display:block;border:1.5px dashed var(--line);border-radius:12px;padding:24px;text-align:center;color:var(--mute);cursor:pointer;margin-bottom:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}#msg{min-height:1.5em;margin-top:10px;color:var(--mute)}#msg.bad{color:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.ph{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--line)}.ph img{width:100%;height:100%;object-fit:cover}
+.ph button{position:absolute;right:6px;top:6px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:20px;cursor:pointer}
+.ph span{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.65);color:#fff;font-size:.75rem;padding:2px 8px;border-radius:99px}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+</style></head><body><main>
+<h1>Portfolio manager</h1><p>Upload photos per event. They appear on the public portfolio right away.</p>
+<div class="card">
+  <label for="pw">Admin password</label><input type="password" id="pw" autocomplete="current-password">
+  <label for="cat">Event</label>
+  <select id="cat">
+    <option value="birthday">Birthday</option><option value="wedding">Wedding</option><option value="christening">Christening</option>
+    <option value="anniversary">Anniversary</option><option value="debut">Debut</option><option value="maternity">Maternity</option>
+    <option value="portrait">Portrait</option><option value="product">Product</option><option value="other">Other</option>
+  </select>
+  <label class="drop" for="files">Tap to choose photos (you can pick many)</label>
+  <input type="file" id="files" accept="image/*" multiple hidden>
+  <div class="row"><button class="btn" id="go" type="button" disabled>Upload photos</button><span id="count" style="color:var(--mute)"></span></div>
+  <div id="msg" role="status"></div>
+</div>
+<div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0;font-weight:500;font-size:1.1rem">Uploaded photos</h2>
+  <select id="filter" style="width:auto;margin:0"><option value="all">All events</option></select></div>
+<div class="grid" id="grid"></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);let queue=[],all=[];
+const pw=$('pw');pw.value=sessionStorage.getItem('gpw')||'';
+const say=(t,bad)=>{$('msg').textContent=t;$('msg').className=bad?'bad':''};
+$('files').onchange=e=>{queue=[...e.target.files];$('count').textContent=queue.length?queue.length+' selected':'';$('go').disabled=!queue.length};
+function shrink(file){return new Promise((ok,no)=>{const img=new Image(),u=URL.createObjectURL(file);
+  img.onload=()=>{const m=1800,s=Math.min(1,m/Math.max(img.width,img.height)),c=document.createElement('canvas');
+    c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.82))};img.onerror=()=>no(new Error('bad image'));img.src=u})}
+async function api(method,body){const r=await fetch('/api/admin',{method,headers:{'Content-Type':'application/json','x-admin-password':pw.value},body:JSON.stringify(body)});
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Request failed');return d}
+$('go').onclick=async()=>{sessionStorage.setItem('gpw',pw.value);$('go').disabled=true;let n=0;
+  for(const f of queue){try{say(`Uploading ${n+1} of ${queue.length}…`);await api('POST',{category:$('cat').value,image:await shrink(f)});n++}
+    catch(e){say(e.message+'. Upload stopped.',true);$('go').disabled=false;load();return}}
+  say(`${n} photo${n>1?'s':''} uploaded.`);queue=[];$('files').value='';$('count').textContent='';load()};
+async function load(){const d=await (await fetch('/api/portfolio?'+Date.now())).json();all=d.items||[];
+  const cats=[...new Set(all.map(i=>i.category))],cur=$('filter').value;
+  $('filter').innerHTML='<option value="all">All events</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');$('filter').value=cats.includes(cur)?cur:'all';draw()}
+function draw(){const f=$('filter').value,g=$('grid');g.innerHTML='';
+  const list=all.filter(i=>f==='all'||i.category===f);if(!list.length){g.innerHTML='<p>No photos yet. Choose an event and upload your first set.</p>';return}
+  list.forEach(i=>{const d=document.createElement('div');d.className='ph';d.innerHTML=`<img loading="lazy" src="${i.url}" alt=""><span>${i.category}</span><button type="button" aria-label="Delete photo">×</button>`;
+    d.querySelector('button').onclick=async()=>{if(!confirm('Delete this photo?'))return;try{await api('DELETE',{url:i.url});load()}catch(e){say(e.message,true)}};g.appendChild(d)})}
+$('filter').onchange=draw;load();
+</script></body></html>
