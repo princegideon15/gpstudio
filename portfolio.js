@@ -6,7 +6,8 @@ export default async function handler(req, res) {
       const r = await list({ prefix: 'portfolio/', cursor, limit: 1000 });
       for (const b of r.blobs) {
         const [, category = 'other'] = b.pathname.split('/');
-        items.push({ url: b.url, category, uploadedAt: b.uploadedAt });
+        const m = b.pathname.match(/_(\d+)x(\d+)\.jpg$/);
+        items.push({ url: b.url, category, r: m ? `${m[1]}/${m[2]}` : '4/5', uploadedAt: b.uploadedAt });
       }
       cursor = r.hasMore ? r.cursor : undefined;
     } while (cursor);
